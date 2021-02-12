@@ -219,25 +219,21 @@ public:
                 output.push_back( centroids[i] );
             }
         } else {
-			//###VDS Ceres Error: comment ceres::Solver. Use same code as centroids.size() > 10 
-			for (size_t i = 0; i < centroids.size(); ++i) {
-				output.push_back(centroids[i]);
-			}
-            /*ceres::Problem problem;
+            ceres::Problem problem;
             for (size_t i = 0; i < xData.size(); ++i) {
                 ceres::CostFunction* costFunction = AutoDiffCostFunctionFactory::buildCostFunction<GaussianFittingCentroids<mz_t, int_t>, mz_t, int_t>(centroids, xData[i], yData[i]);
                 problem.AddResidualBlock( costFunction, NULL, &data[0]);
             }
             
             /** solve the problem */
-            /*ceres::Solver::Summary summary;
+            ceres::Solver::Summary summary;
             ceres::Solve(options, &problem, &summary);
             //std::cout << "Brief report: " << summary.BriefReport() << "\n";
             //std::cout << "Full report: " << summary.FullReport() << "\n";
-            */
+            
             
             /** fill the result values*/
-           /* for (size_t i = 0; i < centroids.size(); ++i) {
+            for (size_t i = 0; i < centroids.size(); ++i) {
                 auto c = centroids[i];
                 
                 double intensity = data[i*3];
@@ -259,9 +255,8 @@ public:
                     c->intensity = intensity;
                 //}
                 output.push_back(c);
-            }*/
-			//###VDS Ceres Error END
-        }
+            }
+		}
         //centroids.clear();
 		//###VDS Test logs	
 		//std::stringstream  msg4;
