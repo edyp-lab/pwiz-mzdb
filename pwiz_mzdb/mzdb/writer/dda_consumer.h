@@ -109,7 +109,7 @@ public:
 
             // TODO check if spectra are correctly inserted (spectrum values are distinguished for PROFILE and CENTROID/FITTED)
             double bbMzWidth = (msLevel == 1 ? bbMzWidthByMsLevel[1] : bbMzWidthByMsLevel[2]);
-			std::cout << "\n*** Consumer STEP 13";
+			std::cout << "\n*** Consumer STEP 13"; 
             this->buildAndInsertData<h_mz_t, h_int_t, l_mz_t, l_int_t>(msLevel, bbMzWidth, highResSpectra, lowResSpectra, runSlices[msLevel]);
 			std::cout << "\n*** Consumer STEP 14";
             if(progressInformationEnabled) {
