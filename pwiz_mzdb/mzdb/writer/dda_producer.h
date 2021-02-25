@@ -159,8 +159,11 @@ public:
         float lastMs1Rt = 0;
 
         size_t size = spectrumList->size();
+		boolean view = false;
         for(size_t i = 0; i < spectrumList->size(); i++) {
             scanCount = i + 1;
+			if (scanCount % 1000 == 0 || scanCount >= 45220)
+				std::cout << "\n--- READ " << scanCount << " scans !";
             pwiz::msdata::SpectrumPtr spectrum;
             pwiz::msdata::SpectrumPtr centroidSpectrum;
             int msLevel;
@@ -206,17 +209,20 @@ public:
             }
             
             // set new precursor
+			if (scanCount % 1000 == 0 || scanCount >= 45220) std::cout << "\n--- STEP 10 ";
             if (msLevel == 1 ) {
                 currMs1 = std::make_shared<mzSpectrum<h_mz_t, h_int_t> >(scanCount, cycleCount, spectrum, centroidSpectrum, wantedMode, m_safeMode);
                 currMs1Id = i;
             }
 
             //init
+			if (scanCount % 1000 == 0 || scanCount >= 45220) std::cout << "\n--- STEP 11 ";
             if (spectraByMsLevel.find(msLevel) == spectraByMsLevel.end()) {
                 SpectraContainerUPtr spectraCollection(new SpectraContainer(msLevel));
                 spectraCollection->parentSpectrum = currMs1;
                 spectraByMsLevel[msLevel] = std::move(spectraCollection);
             }
+			if (scanCount % 1000 == 0 || scanCount >= 45220) 	std::cout << "\n--- STEP 12 ";
             auto& bbRtWidthBound = bbRtWidth[msLevel];
             const float rt = PwizHelper::rtOf(spectrum);
             if(rt == 0) std::cerr << "Can not find RT for spectrum " << spectrum->id; //LOG(ERROR)
@@ -224,6 +230,7 @@ public:
             bool added = false;
 
             //get a reference to the unique pointer corresponding to the current mslevel
+			if (scanCount % 1000 == 0 || scanCount >= 45220) std::cout << "\n--- STEP 13 ";
             auto& container = spectraByMsLevel[msLevel];
 
             if (container->empty() ) {
@@ -233,7 +240,9 @@ public:
             }
 
             //check if the bounding box is well sized. If yes, launch peak-picking and add it to the queue
+			if (scanCount % 1000 == 0 || scanCount >= 45220) std::cout << "\n--- STEP 14 ";
             if ( (rt - container->getBeginRt()) >= bbRtWidthBound)  {
+				if (scanCount % 1000 == 0 || scanCount >= 45220) 	std::cout << "\n--- STEP 14a ";
                 this->_peakPickAndPush(container, filetype, params);
                 //---create a new container
                 SpectraContainerUPtr c(new SpectraContainer(msLevel));
@@ -246,19 +255,23 @@ public:
                 }
                 spectraByMsLevel[msLevel] = std::move(c);
             } else {
+				if (scanCount % 1000 == 0 || scanCount >= 45220) std::cout << "\n--- STEP 14b ";
                 if (!added) {
                     currMs1Id == i ? container->addHighResSpectrum(currMs1) : this->_addSpectrum(container, scanCount, cycleCount, isInHighRes, spectrum, centroidSpectrum, wantedMode);
                     //this->_addSpectrum(container, scanCount, cycleCount, isInHighRes, spectrum, centroidSpectrum, wantedMode);
                 }
             }
             // delete spectra objects
+			if (scanCount % 1000 == 0 || scanCount >= 45220) std::cout << "\n--- STEP 15";
             spectrum.reset();
+			if (scanCount % 1000 == 0 || scanCount >= 45220) std::cout << "\n--- STEP 16";
             centroidSpectrum.reset();
             
             //genericUtils::checkMemoryUsage(""); // just to avoid memory leaks
         } // end for
 
         //handles ending, i.e non finished cycles
+		std::cout << "\n--- STEP 20";
         for(int i = 1; i <= spectraByMsLevel.size(); ++i) {
             // FIX: when there are only MS2 spectra
             if (spectraByMsLevel.find(i) != spectraByMsLevel.end()) {
@@ -268,12 +281,13 @@ public:
                 }
             }
         }
-
+		std::cout << "\n--- STEP 21";
         //just logging if we did not found any spectrea with mslvl = 1
         if (m_msLevels.find(1) == m_msLevels.end()) {
 			std::cerr << "Did not see any msLevel 1 !";//LOG(WARNING)
         }
 
+		std::cout << "\n--- STEP 22";
         //signify that we finished producing sending a poison pill
         SpectraContainerUPtr nullContainer(nullptr);
         this->put(nullContainer);
