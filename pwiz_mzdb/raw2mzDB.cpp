@@ -470,6 +470,14 @@ int main(int argc, char* argv[]) {
         std::cout << version.str() << std::endl;
         exit(EXIT_SUCCESS);
     }
+
+	unsigned char optMode = mzPeakFinderUtils::GAUSS_OPTIMIZATION;
+	if (ops >> OptionPresent('n', "nogauss")) {
+		std::cout <<"no Gauss optimization" << std::endl;
+		optMode = mzPeakFinderUtils::NO_OPTIMIZATION;
+	}
+
+
     //ops >> Option('C', "compress", compression)
     if (ops.options_remain()) {
 		std::cerr   <<"Oops! Unexpected options. Refer to help"; //LOG(ERROR)
@@ -576,6 +584,7 @@ int main(int argc, char* argv[]) {
     }
 
     auto& msData = msdList[0];
+
 	// ###VDS  : identifyFileFormat changed to identifyAsReader ...
 	// WAS: auto originFileFormat = pwiz::msdata::identifyFileFormat(readers, f.name);
 	CVID originFileFormat;
@@ -583,12 +592,14 @@ int main(int argc, char* argv[]) {
 		ExtendedReaderList readerList;
 		 originFileFormat = readerList.identifyAsReader(f.name)->getCvType();
 	} catch (exception& e) {
+
 		std::cerr  << e.what() << endl;
 		std::cerr << "This a fatal error. ..." << endl;
 		exit(EXIT_FAILURE);
 	}
+
 	std::cout  << "WILL create writer\n"; //LOG(INFO) 
-	mzDBWriter writer(f, msData, originFileFormat, dataModeByMsLevel, buildDate, resolutions, compress, safeMode);
+	mzDBWriter writer(f, msData, originFileFormat, dataModeByMsLevel, buildDate, resolutions, compress, safeMode, optMode);
 	
 	std::cout << "WILL call checkMetaData\n";//LOG(INFO) 
     //---insert metadata
@@ -662,6 +673,10 @@ int main(int argc, char* argv[]) {
 
     //---create parameters for peak picking
     mzPeakFinderUtils::PeakPickerParams p;
+
+	// overriding optimization mode (will not be kept when mode is not possible)
+	p.optimizationOpt = optMode;
+
     // overriding ppm
     //p.ppm = ppm;
 
