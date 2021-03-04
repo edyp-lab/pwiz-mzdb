@@ -157,11 +157,14 @@ public:
         HighResSpectrumSPtr currMs1(nullptr);
         size_t currMs1Id = 0;
         float lastMs1Rt = 0;
+		
+		std::cout << "\n--- PRODUCER START !";
 
         size_t size = spectrumList->size();
 		boolean view = false;
-        for(size_t i = 0; i < spectrumList->size(); i++) {
+        for(size_t i = 0; i < spectrumList->size(); i++) {  //JPM add && i<45000 to test performances
             scanCount = i + 1;
+
 			if (scanCount % 1000 == 0 || scanCount >= 45220)
 				std::cout << "\n--- READ " << scanCount << " scans !";
             pwiz::msdata::SpectrumPtr spectrum;
@@ -241,9 +244,22 @@ public:
 
             //check if the bounding box is well sized. If yes, launch peak-picking and add it to the queue
 			if (scanCount % 1000 == 0 || scanCount >= 45220) std::cout << "\n--- STEP 14 ";
-            if ( (rt - container->getBeginRt()) >= bbRtWidthBound)  {
-				if (scanCount % 1000 == 0 || scanCount >= 45220) 	std::cout << "\n--- STEP 14a ";
+
+
+			if (scanCount == 45249) { //JPM
+				std::cout << "\nrt:" << rt << "  container.begin:" << container->getBeginRt() << "  bbrtwidthBound:" << bbRtWidthBound;
+			}
+
+            if ( (rt - container->getBeginRt()) >= bbRtWidthBound){
+				if (scanCount % 1000 == 0 || scanCount >= 45220) 	std::cout << "\n--- STEP 14a1 ";
+
+				if (scanCount >= 45240) { //JPM
+					std::cout << "\n--- Bug last time was at 45249 ";
+					std::cout << "\nrt:" << rt << "  container.begin:" << container->getBeginRt() << "  bbrtwidthBound:" << bbRtWidthBound;
+				}
+
                 this->_peakPickAndPush(container, filetype, params);
+				if (scanCount % 1000 == 0 || scanCount >= 45220) 	std::cout << "\n--- STEP 14a2 ";
                 //---create a new container
                 SpectraContainerUPtr c(new SpectraContainer(msLevel));
                 //set its parent

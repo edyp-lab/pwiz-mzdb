@@ -62,6 +62,8 @@ private:
                                 mzPeakFinderUtils::PeakPickerParams& params,
                                 size_t maxNbThreads) {
 
+		maxNbThreads = 1; //JPM
+
         for (size_t j = 0, N = spectra.size(); j < N; j += maxNbThreads) {
             boost::thread_group g;
             size_t counter = ( N - j < maxNbThreads ) ? N - j : maxNbThreads;
