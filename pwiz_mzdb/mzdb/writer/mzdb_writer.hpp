@@ -440,15 +440,29 @@ public:
 
             if (m_swathMode) {
 				std::cout << "DIA producer/consumer";//LOG(INFO)
-                auto prod = pcThreadBuilder.getDIAThermoProducerThread(levelsToCentroid, s, cycleRange, rtRange, m_originFileFormat, params);
+
+
+				// mono-threade code, due to bugs found in multi-threaded code
+				pcThreadBuilder.calculateDIAThermo(levelsToCentroid, s, cycleRange, rtRange, m_originFileFormat, params, m_msdata, m_serializer, bbHeightManager, runSlices, progressCount, spectrumListSize, progressInformationEnabled);
+
+				// previous muli-threaded code
+                /*auto prod = pcThreadBuilder.getDIAThermoProducerThread(levelsToCentroid, s, cycleRange, rtRange, m_originFileFormat, params);
                 auto cons = pcThreadBuilder.getDIAThermoConsumerThread(m_msdata, m_serializer, bbHeightManager, bbWidthManager, runSlices, progressCount, spectrumListSize, progressInformationEnabled);
-                prod.join(); cons.join();
+                prod.join(); cons.join();*/
 
             } else {
 				std::cout << "DDA producer/consumer";//LOG(INFO)
-                auto prod = pcThreadBuilder.getDDAThermoProducerThread(levelsToCentroid, s, cycleRange, rtRange, bbWidthManager, m_originFileFormat, params);
-                auto cons = pcThreadBuilder.getDDAThermoConsumerThread(m_msdata, m_serializer, bbHeightManager, runSlices, progressCount, spectrumListSize, progressInformationEnabled);
-                prod.join(); cons.join();
+
+				// mono-threade code, due to bugs found in multi-threaded code
+				pcThreadBuilder.calculateDDAThermo(levelsToCentroid, s, cycleRange, rtRange, bbWidthManager, m_originFileFormat, params, m_msdata, m_serializer, bbHeightManager, runSlices, progressCount, spectrumListSize, progressInformationEnabled);
+
+				// previous muli-threaded code
+				/*auto prod = pcThreadBuilder.getDDAThermoProducerThread(levelsToCentroid, s, cycleRange, rtRange, bbWidthManager, m_originFileFormat, params);
+				auto cons = pcThreadBuilder.getDDAThermoConsumerThread(m_msdata, m_serializer, bbHeightManager, runSlices, progressCount, spectrumListSize, progressInformationEnabled);
+				prod.join(); cons.join(); //JPM
+				*/
+
+				
             }
 
         } else if (m_Mode == 2) {
