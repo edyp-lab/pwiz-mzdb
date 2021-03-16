@@ -34,6 +34,7 @@
 
 #include "dda_consumer.h"
 #include "dda_producer.h"
+#include "dda_consumer_producer.h"
 #include "swath_consumer.hpp"
 #include "swath_producer.hpp"
 #include "metadata_extractor.hpp"
@@ -76,6 +77,20 @@ protected:
     mzThermoMetadataExtractor,
     PeakPicker,
     SpectrumListThermo> DDAThermoProducer;
+	
+	// thermo IDA producer + consumer
+	typedef mzConsumerProducer< QueueType,
+		mzThermoMetadataExtractor,
+		PeakPicker,
+		SpectrumListThermo> DIAThermoConsumerProducer;
+
+	// thermo DDA producer + consumer
+	typedef  mzConsumerProducer< QueueType,
+		mzThermoMetadataExtractor,
+		PeakPicker,
+		SpectrumListThermo> DDAThermoConsumerProducer;
+
+	
 
     ///bruker DIA
     typedef mzSwathProducer<QueueType,
@@ -192,6 +207,9 @@ protected:
     unique_ptr<DIAThermoProducer> mDiaThermoProducer;
     unique_ptr<DDAThermoProducer> mDdaThermoProducer;
 
+	unique_ptr<DIAThermoConsumerProducer> mDiaThermoConsumerProducer;
+	unique_ptr<DDAThermoConsumerProducer> mDdaThermoConsumerProducer;
+
     unique_ptr<DIABrukerProducer> mDiaBrukerProducer;
     unique_ptr<DDABrukerProducer> mDdaBrukerProducer;
 
@@ -257,6 +275,11 @@ public:
         mSwathGenericProducer(nullptr),
         mDdaGenericProducer(nullptr),
 
+		// producer and consumer
+		mDiaThermoConsumerProducer(nullptr),
+		mDdaThermoConsumerProducer(nullptr),
+
+
         //consumers
         mDiaThermoConsumer(nullptr),
         mDdaThermoConsumer(nullptr),
@@ -280,8 +303,13 @@ public:
         if (mode == 1) {
             mDiaThermoProducer = unique_ptr<DIAThermoProducer>(new DIAThermoProducer(queue, mzdbFile, dataModeByMsLevel, resolutions, safeMode));
             mDdaThermoProducer = unique_ptr<DDAThermoProducer>(new DDAThermoProducer(queue, mzdbFile, dataModeByMsLevel, resolutions, safeMode));
-            mDiaThermoConsumer = unique_ptr<DIAThermoConsumer>(new DIAThermoConsumer(queue, mzdbFile, paramsCollecter, rawFileFormat, dataEncodings));
+
+			mDiaThermoConsumer = unique_ptr<DIAThermoConsumer>(new DIAThermoConsumer(queue, mzdbFile, paramsCollecter, rawFileFormat, dataEncodings));
             mDdaThermoConsumer = unique_ptr<DDAThermoConsumer>(new DDAThermoConsumer(queue, mzdbFile, paramsCollecter, rawFileFormat, dataEncodings));
+
+			mDiaThermoConsumerProducer = unique_ptr<DIAThermoConsumerProducer>(new DIAThermoConsumerProducer(queue, mzdbFile, paramsCollecter, rawFileFormat, dataEncodings, dataModeByMsLevel, resolutions, safeMode));
+			mDdaThermoConsumerProducer = unique_ptr<DDAThermoConsumerProducer>(new DDAThermoConsumerProducer(queue, mzdbFile, paramsCollecter, rawFileFormat, dataEncodings, dataModeByMsLevel, resolutions, safeMode));
+			
         } else if (mode == 2) {
             mDiaBrukerProducer = unique_ptr<DIABrukerProducer>(new DIABrukerProducer(queue, mzdbFile, dataModeByMsLevel, resolutions, safeMode));
             mDdaBrukerProducer = unique_ptr<DDABrukerProducer>(new DDABrukerProducer(queue, mzdbFile, dataModeByMsLevel, resolutions, safeMode));
@@ -480,6 +508,55 @@ public:
         return this->mDdaThermoConsumer->getConsumerThread(msdata, serializer, bbMzWidthByMsLevel,
                                                            runSlices, progressionCount, spectrumListSize, progressInformationEnabled);
     }
+
+
+
+
+	 inline void calculateDDAThermo(
+		pwiz::util::IntegerSet& levelsToCentroid,
+		SpectrumListThermo* spectrumList,
+		pair<int, int>& cycleRange,
+		pair<int, int>& rtRange,
+		map<int, double>& bbWidthManager,
+		pwiz::msdata::CVID filetype,
+		mzPeakFinderUtils::PeakPickerParams& params,
+
+		pwiz::msdata::MSDataPtr msdata,
+		ISerializer::xml_string_writer& serializer,
+		map<int, double>& bbMzWidthByMsLevel,
+		map<int, map<int, int> >& runSlices,
+		int& progressionCount,
+		int spectrumListSize,
+		bool progressInformationEnabled) {
+
+		 //JPM
+		this->mDdaThermoConsumerProducer->_produceDDAMonoThread(levelsToCentroid, spectrumList, cycleRange, rtRange, bbWidthManager, filetype, params,
+		   msdata, serializer, bbMzWidthByMsLevel, runSlices, progressionCount, spectrumListSize, progressInformationEnabled);
+
+	}
+
+	 inline void calculateDIAThermo(
+		 pwiz::util::IntegerSet& levelsToCentroid,
+		 SpectrumListThermo* spectrumList,
+		 pair<int, int>& cycleRange,
+		 pair<int, int>& rtRange,
+		 //map<int, double>& bbWidthManager,
+		 pwiz::msdata::CVID filetype,
+		 mzPeakFinderUtils::PeakPickerParams& params,
+
+		 pwiz::msdata::MSDataPtr msdata,
+		 ISerializer::xml_string_writer& serializer,
+		 map<int, double>& bbMzWidthByMsLevel,
+		 map<int, map<int, int> >& runSlices,
+		 int& progressionCount,
+		 int spectrumListSize,
+		 bool progressInformationEnabled) {
+
+		 //JPM
+		 this->mDiaThermoConsumerProducer->_produceDIAMonoThread(levelsToCentroid, spectrumList, cycleRange, rtRange, filetype, params,
+			 msdata, serializer, bbMzWidthByMsLevel, runSlices, progressionCount, spectrumListSize, progressInformationEnabled);
+
+	 }
 
 
     /** dia bruker consumer */
