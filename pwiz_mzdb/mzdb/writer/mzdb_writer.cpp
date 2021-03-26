@@ -511,13 +511,9 @@ PWIZ_API_DECL mzDBWriter::mzDBWriter(mzdb::MzDBFile& f,
 
 
     //implementation goes here
-	std::cout << "STEP 1";//LOG(INFO) 
     m_metadataExtractor = std::move(this->getMetadataExtractor());
-	std::cout << "STEP 2";//LOG(INFO) 
     this->buildDataEncodingRowByID();
-	std::cout << "STEP 3"; //LOG(INFO) 
     this->computeResolutions(optMode);
-	std::cout << "STEP 4"; //LOG(INFO) 
 }
 
 
@@ -1065,15 +1061,14 @@ void mzDBWriter::isSwathAcquisition() {
         return;
     }
     
-	std::cout << "DDA / DIA test";//LOG(INFO)
     
     vector<double> refTargets = PwizHelper::determineIsolationWindowStarts(m_msdata->run.spectrumListPtr);
     // check what has been seen
     if(refTargets.size() == 0) {
-		std::cout << "DDA Mode detected";//LOG(INFO)
+		std::cout << "DDA Mode detected \n";//LOG(INFO)
         m_swathMode = false;
     } else {
-		std::cout  << "DIA Mode detected";//LOG(INFO)
+		std::cout  << "DIA Mode detected \n";//LOG(INFO)
         m_swathMode = true;
         // print the isolation windows
         //for(int i = 0; i < refTargets.size() - 1; i++) {
@@ -1168,23 +1163,18 @@ void mzDBWriter::computeResolutions(int nbSpectraToConsider, double minIntensity
     map<int, bool> profileMsLevels;
     
     //m_resolutions.clear();
-	 std::cout << "  - STEP a";//LOG(INFO)
-    // do nothing if user has provided resolutions using CLI
+
+	// do nothing if user has provided resolutions using CLI
     // it is possible that he gave only MS1 and MS2 values but no MS3 value, in this case the default value will be used
     if(m_resolutions.size() == 0) {
-		std::cout << "  - STEP b";//LOG(INFO)
-		
-		std::cout << "  - STEP c";//LOG(INFO)
+	
         // if raw file is not AB Sciex wiff file, use default values
+		//### VDS TODO: get original code... changes were made with default value ! 
         if(m_originFileFormat != MS_ABI_WIFF_format) { // or use m_Mode != 3 ?
 			int defReso;
 			defReso = 20000;
-			std::cout << "  - STEP d ";//LOG(INFO)
 			string defVersion = "default resol";
-			std::cout << "  - STEP e ";//LOG(INFO)
 			defVersion += " " + defReso;
-			std::cout << "  - STEP f "; // LOG(INFO)
-			std::cout << " == " << defVersion;// LOG(INFO)
 			std::cout << "Using default resolution ("  ")";// LOG(INFO)
             m_storeResolutions = false; // no need to store these values
             // put default resolutions for all ms levels (but they wont be used for these file types)
