@@ -496,10 +496,10 @@ int main(int argc, char* argv[]) {
 
 #ifdef _WIN32
 	//###VDS TIMSTOF Error ( timstof data is a directory ), should comment next verif in that case TODO
-    if (alreadyOpened(filename)) {
+    /*if (alreadyOpened(filename)) {
 		std::cerr << "File already open in another application.\nPlease close it to perform conversion.";// LOG(ERROR)
         exit(EXIT_FAILURE);
-    }
+    }*/
 #endif
 
     // check output file name, use input file name if missing, make sure to have the right extension, delete former file if any
@@ -601,7 +601,7 @@ int main(int argc, char* argv[]) {
 	std::cout  << "WILL create writer\n"; //LOG(INFO) 
 	mzDBWriter writer(f, msData, originFileFormat, dataModeByMsLevel, buildDate, resolutions, compress, safeMode, optMode);
 	
-	std::cout << "WILL call checkMetaData\n";//LOG(INFO) 
+	
     //---insert metadata
     try {
         writer.checkMetaData();
