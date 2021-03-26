@@ -245,8 +245,17 @@ namespace timsdata
         template<typename VectorIn, typename VectorOut>
         void indexToMz(int64_t frame_id, const VectorIn& in, VectorOut& out) const
         {
-            if (in.empty()) { out.clear(); return; }
-            if (in.size() > std::numeric_limits<uint32_t>::max()) BOOST_THROW_EXCEPTION(std::runtime_error("Input range too large."));
+            if (in.empty()) { 
+				out.clear(); 
+				return; 
+			}
+			//###VDS TimsTof: Next line generates compile error when included. Was
+//			if (in.size() > std::numeric_limits<uint32_t>::max())
+	//			BOOST_THROW_EXCEPTION(std::runtime_error("Input range too large."));
+			//###VDS TimsTof changed
+			if (in.size() > (std::numeric_limits<uint32_t>::max)())
+				BOOST_THROW_EXCEPTION(std::runtime_error("Input range too large."));
+			//###VDS TimsTof: End
             out.resize(in.size());
             tims_index_to_mz(handle, frame_id, &in[0], &out[0], uint32_t(in.size()));
         }
@@ -255,7 +264,12 @@ namespace timsdata
         void scanNumToOneOverK0(int64_t frame_id, const VectorIn& in, VectorOut& out) const
         {
             if (in.empty()) { out.clear(); return; }
-            if (in.size() > std::numeric_limits<uint32_t>::max()) BOOST_THROW_EXCEPTION(std::runtime_error("Input range too large."));
+			//###VDS TimsTof: Next line generates compile error when included. Was
+			// if (in.size() > std::numeric_limits<uint32_t>::max()) BOOST_THROW_EXCEPTION(std::runtime_error("Input range too large."));
+			//###VDS TimsTof changed
+			if (in.size() > (std::numeric_limits<uint32_t>::max)())
+				BOOST_THROW_EXCEPTION(std::runtime_error("Input range too large."));
+			//###VDS TimsTof: End
             out.resize(in.size());
             tims_scannum_to_oneoverk0(handle, frame_id, &in[0], &out[0], uint32_t(in.size()));
         }

@@ -257,7 +257,7 @@ static void findLocalMinima( const vector<mz_uint>& maxIndexes, const VEC& data,
 
 
 /**
-*###VDS Ceres Error: not used ?!
+*###VDS Ceres Error: method never used ?!
 */
 template<class mz_t, class int_t>
 static void optimizeCeres(const vector<double>& mzData,

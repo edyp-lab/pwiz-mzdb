@@ -495,7 +495,7 @@ int main(int argc, char* argv[]) {
     }
 
 #ifdef _WIN32
-	//###VDS TIMSTOF Error (directory ) comment next verif
+	//###VDS TIMSTOF Error ( timstof data is a directory ), should comment next verif in that case TODO
     if (alreadyOpened(filename)) {
 		std::cerr << "File already open in another application.\nPlease close it to perform conversion.";// LOG(ERROR)
         exit(EXIT_FAILURE);

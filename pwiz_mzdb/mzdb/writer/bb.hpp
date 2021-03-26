@@ -350,7 +350,8 @@ public:
             if ( it->second.empty())
                 continue;
             Centroid<l_mz_t, l_int_t>& p = *(it->second.front());
-            //VDS TO CONTIONU COMPILE ///_rtmin = std::min(p.rt, _rtmin);
+            //###VDS VS2017 COMPILE error ?! change ///_rtmin = std::min(p.rt, _rtmin);
+			//to 
 			if (p.rt < _rtmin)
 				_rtmin = p.rt;
             break;
@@ -368,9 +369,10 @@ public:
             if ( it->second.empty())
                 continue;
             Centroid<l_mz_t, l_int_t>& p = *(it->second.front());
-			//VDS TO CONTIONU COMPILE /// _rtmax = std::max(p.rt, _rtmin);
+			//###VDS VS2017 COMPILE error ?! change ///_rtmax = std::max(p.rt, _rtmin);
+			//to 			
 			_rtmax = _rtmin;
-			if (p.rt > _rtmin) //VDS min ????
+			if (p.rt > _rtmin) //VDS min ???? or should be max ?
 				_rtmax = p.rt;
 
             break;
