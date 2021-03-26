@@ -103,10 +103,10 @@ int deleteIfExists(const string &filename) {
 
     if (std::ifstream(filename.c_str())) {
         if (remove(filename.c_str()) != 0) {
-			std::cerr << "File " << filename << " already exists and is locked, exiting...";//  LOG(ERROR) 
+			std::cerr << "File " << filename << " already exists and is locked, exiting..." << "\n";//  LOG(ERROR) 
             exit(EXIT_FAILURE);
         } else {
-			std::cout << "Done"; //LOG(INFO) 
+			std::cout << "Done" << std::endl; //LOG(INFO) 
         }
     }
     return 0;
@@ -598,7 +598,7 @@ int main(int argc, char* argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	std::cout  << "WILL create writer\n"; //LOG(INFO) 
+	std::cout  << "WILL create writer " << std::endl; //LOG(INFO) 
 	mzDBWriter writer(f, msData, originFileFormat, dataModeByMsLevel, buildDate, resolutions, compress, safeMode, optMode);
 	
 	
@@ -684,14 +684,17 @@ int main(int argc, char* argv[]) {
 
     try {
         if (noLoss) {
-            //LOG(INFO) << "No-loss mode encoding: all ms Mz-64, all ms Int-64";
+            //LOG(INFO) 
+			std::cout  << "No-loss mode encoding: all ms Mz-64, all ms Int-64" << std::endl;
             writer.writeNoLossMzDB(outputFileNameTmp, cycleRange, rtRange, nbCycles, p);
         } else {
             if (false) { // If msInstrument only good at ms1
-                //LOG(INFO) << "ms1 Mz-64, all ms Int-32 encoding";
+                //LOG(INFO)
+				std::cout << "ms1 Mz-64, all ms Int-32 encoding" << std::endl;
                 writer.writeMzDBMzMs1Hi(outputFileNameTmp, cycleRange, rtRange, nbCycles, p);
             } else {
-                //LOG(INFO) << "all ms Mz-64, all ms Int-32 encoding";
+                //LOG(INFO) 
+				std::cout << "all ms Mz-64, all ms Int-32 encoding" << std::endl;
                 writer.writeMzDBMzHi(outputFileNameTmp, cycleRange, rtRange, nbCycles, p);
             }
         }
