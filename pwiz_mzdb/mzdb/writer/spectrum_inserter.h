@@ -258,7 +258,7 @@ public:
         sqlite3_bind_int(mMzdbFile.stmt, 1, spectrum->id);
 
         //initial_id
-        sqlite3_bind_int(mMzdbFile.stmt, 2, spectrum->id + scanOffset);
+        sqlite3_bind_int(mMzdbFile.stmt, 2, spectrum->id /*+ scanOffset*/); //JPM.TEST
 
         //title
         sqlite3_bind_text(mMzdbFile.stmt, 3, title.c_str(), title.length(), SQLITE_STATIC);
@@ -277,8 +277,16 @@ public:
         //activation_type
         string activationCode;
         if (msLevel > 1) {
-            activationCode = mzdb::getActivationCode(spec->precursors.front().activation);
-            sqlite3_bind_text(mMzdbFile.stmt, 7, activationCode.c_str(), activationCode.length(), SQLITE_STATIC);
+			if (!spec->precursors.empty()) {
+				activationCode = mzdb::getActivationCode(spec->precursors.front().activation);
+				sqlite3_bind_text(mMzdbFile.stmt, 7, activationCode.c_str(), activationCode.length(), SQLITE_STATIC);
+			}
+			else {
+				// for timstof : sometimes there is no precursor, so we can not retrieve activationCode
+
+				// in the sql model shoud not be null -> use an empty string
+				sqlite3_bind_text(mMzdbFile.stmt, 7, "", 0, SQLITE_STATIC);
+			}
         } else {
             // in the sql model shoud not be null -> use an empty string
             sqlite3_bind_text(mMzdbFile.stmt, 7, "", 0, SQLITE_STATIC);
