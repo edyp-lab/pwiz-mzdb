@@ -356,6 +356,12 @@ inline static float rtOf(const pwiz::msdata::SpectrumPtr& s) {
 }
 
 inline static int precursorChargeOf(const pwiz::msdata::SpectrumPtr &s) {
+
+	if (s->precursors.empty()) {
+		//JPM : timstof: no precursors
+		return 0;
+	}
+
     const pwiz::msdata::SelectedIon& si = s->precursors.front().selectedIons.front();
     return si.cvParam(pwiz::msdata::MS_charge_state).valueAs<int>();
 }
@@ -366,6 +372,10 @@ inline static int precursorChargeOf(const pwiz::msdata::SpectrumPtr &s) {
  * @return precusor mz as double value
  */
 inline static double precursorMzOf(const pwiz::msdata::SpectrumPtr &s) {
+	if (s->precursors.empty()) {
+		//JPM : timstof: no precursors
+		return 0.0;
+	}
     const pwiz::msdata::SelectedIon& si = s->precursors.front().selectedIons.front();
     return si.cvParam(pwiz::msdata::MS_selected_ion_m_z).valueAs<double>();
 }
