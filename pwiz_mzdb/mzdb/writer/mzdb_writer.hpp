@@ -453,7 +453,7 @@ public:
             } else {
 				std::cout << "DDA producer/consumer" << std::endl;//LOG(INFO)
 
-				// mono-threade code, due to bugs found in multi-threaded code
+				// mono-threaded code, due to bugs found in multi-threaded code
 				pcThreadBuilder.calculateDDAThermo(levelsToCentroid, s, cycleRange, rtRange, bbWidthManager, m_originFileFormat, params, m_msdata, m_serializer, bbHeightManager, runSlices, progressCount, spectrumListSize, progressInformationEnabled);
 
 				// previous muli-threaded code
@@ -477,9 +477,15 @@ public:
             } else {
 				std::cout << "DDA producer/consumer" << std::endl;//LOG(INFO)
 
-                auto prod = pcThreadBuilder.getDDABrukerProducerThread(levelsToCentroid, s, cycleRange, rtRange, bbWidthManager, m_originFileFormat, params);
+				//JPM
+
+				// mono-threaded code, due to bugs found in multi-threaded code
+				pcThreadBuilder.calculateDDABruker(levelsToCentroid, s, cycleRange, rtRange, bbWidthManager, m_originFileFormat, params, m_msdata, m_serializer, bbHeightManager, runSlices, progressCount, spectrumListSize, progressInformationEnabled);
+
+				
+                /*auto prod = pcThreadBuilder.getDDABrukerProducerThread(levelsToCentroid, s, cycleRange, rtRange, bbWidthManager, m_originFileFormat, params);
                 auto cons = pcThreadBuilder.getDDABrukerConsumerThread(m_msdata, m_serializer, bbHeightManager, runSlices, progressCount, spectrumListSize, progressInformationEnabled);
-                prod.join(); cons.join();
+                prod.join(); cons.join();*/
             }
 
         } else if (m_Mode == 3) {
