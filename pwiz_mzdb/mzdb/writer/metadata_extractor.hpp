@@ -29,7 +29,10 @@
 #include "pwiz_aux/msrc/utility/vendor_api/thermo/RawFile.h"
 #include "pwiz_aux/msrc/utility/vendor_api/thermo/RawFileValues.h"
 #include "pwiz_aux/msrc/utility/vendor_api/ABI/WiffFile.hpp"
-
+//###VDS TimsTof: Tests add include
+#include "pwiz_aux/msrc/utility/vendor_api/Bruker/TimsData.hpp"
+#include "pwiz/utility/chemistry/MzMobilityWindow.hpp"
+//###VDS TimsTof: END
 //#include "../utils/glog/logging.h"
 #include "../utils/mzUtils.hpp"
 #include "user_text.h"
@@ -389,18 +392,36 @@ class mzBrukerMetadataExtractor : public mzAbstractMetadataExtractor< mzBrukerMe
 
     pwiz::vendor_api::Bruker::CompassDataPtr _compassDataPtr;
     double _lowMz, _highMz;
-
+	pwiz::msdata::detail::Bruker::Reader_Bruker_Format _format; //###VDS TimsTof: 
     public:
 
     /// Ctor
     inline mzBrukerMetadataExtractor(std::string& f) : mzAbstractMetadataExtractor<mzBrukerMetadataExtractor,
                                                         (int) pwiz::cv::MS_Bruker_BAF_format >(f) {
         try{
-            pwiz::msdata::detail::Bruker::Reader_Bruker_Format format = pwiz::msdata::detail::Bruker::format(f);
-            if (format == pwiz::msdata::detail::Bruker::Reader_Bruker_Format_Unknown) throw std::exception("[Reader_Bruker::read] Path given is not a recognized Bruker format");
+			//###VDS TimsTof Was 
+			//pwiz::msdata::detail::Bruker::Reader_Bruker_Format format = pwiz::msdata::detail::Bruker::format(f);
+			/*
+			if (format == pwiz::msdata::detail::Bruker::Reader_Bruker_Format_Unknown) throw std::exception("[Reader_Bruker::read] Path given is not a recognized Bruker format");
+			bfs::path rootpath = f;
+			if (bfs::is_regular_file(rootpath)) rootpath = rootpath.branch_path();
+			_compassDataPtr = pwiz::vendor_api::Bruker::CompassData::create(rootpath.string(), format);
+			*/
+			//###VDS TimsTof Was END
+			//###VDS TimsTof: 
+			_format = pwiz::msdata::detail::Bruker::format(f);
+            if (_format == pwiz::msdata::detail::Bruker::Reader_Bruker_Format_Unknown) 
+				throw std::exception("[Reader_Bruker::read] Path given is not a recognized Bruker format");
+			if (_format == pwiz::msdata::detail::Bruker::Reader_Bruker_Format_TDF) 
+				std::cout << " TDF FORMAT found !!! ";
             bfs::path rootpath = f;
-            if (bfs::is_regular_file(rootpath)) rootpath = rootpath.branch_path();
-            _compassDataPtr = pwiz::vendor_api::Bruker::CompassData::create(rootpath.string(), format);
+            if (bfs::is_regular_file(rootpath))
+				rootpath = rootpath.branch_path();
+			if (_format != pwiz::msdata::detail::Bruker::Reader_Bruker_Format_TDF)
+				_compassDataPtr = pwiz::vendor_api::Bruker::CompassData::create(rootpath.string(), _format);
+			else
+				_compassDataPtr = CompassDataPtr(new TimsDataImpl(rootpath.string(),  true, 0, false));
+			//###VDS TimsTof: END
         } catch(exception& e) { 
 			std::cerr << "Bruker Exception: " << e.what(); //LOG(ERROR)
 		};
@@ -413,19 +434,46 @@ class mzBrukerMetadataExtractor : public mzAbstractMetadataExtractor< mzBrukerMe
 
     /**/
     virtual inline pwiz::msdata::SamplePtr getSample() {
-        std::string filename = "", filenameId = "";
-        try {
-            filename = _compassDataPtr->getSampleName();
-        } catch(exception& e) { 
-			std::cerr  << "Bruker getSampleName Exception: " << e.what(); //
+		//###VDS TimsTof: Was
+		/*try {
+			filename = _compassDataPtr->getSampleName();
+		}
+		catch (exception& e) {
+			std::cerr << "Bruker getSampleName Exception: " << e.what(); //
 		};
-        try {
-            filenameId = _compassDataPtr->getAnalysisName();
-        } catch(exception& e) { 
+		try {
+			filenameId = _compassDataPtr->getAnalysisName();
+		}
+		catch (exception& e) {
 			std::cerr << "Bruker getAnalysisName Exception: " << e.what(); //LOG(ERROR)
 		};
-        pwiz::msdata::SamplePtr sample(new pwiz::msdata::Sample(filenameId, filename));
-        return sample;
+		pwiz::msdata::SamplePtr sample(new pwiz::msdata::Sample(filenameId, filename));
+		return sample;*/
+		//###VDS TimsTof: Was END
+		//###VDS TimsTof: No data ?
+		if (_format == pwiz::msdata::detail::Bruker::Reader_Bruker_Format_TDF) {
+			pwiz::msdata::SamplePtr sample(new pwiz::msdata::Sample());
+			return sample;
+		}
+		else {
+			std::string filename = "", filenameId = "";
+			try {
+				filename = _compassDataPtr->getSampleName();
+			}
+			catch (exception& e) {
+				std::cerr << "Bruker getSampleName Exception: " << e.what(); //
+			};
+			try {
+				filenameId = _compassDataPtr->getAnalysisName();
+			}
+			catch (exception& e) {
+				std::cerr << "Bruker getAnalysisName Exception: " << e.what(); //LOG(ERROR)
+			};
+			pwiz::msdata::SamplePtr sample(new pwiz::msdata::Sample(filenameId, filename));
+			return sample;
+		}
+		//###VDS TimsTof: End
+			
     }
 
     virtual inline bool isInHighRes(pwiz::msdata::SpectrumPtr p) {
@@ -446,7 +494,6 @@ class mzBrukerMetadataExtractor : public mzAbstractMetadataExtractor< mzBrukerMe
 };
 
 #endif
-
 
 }
 

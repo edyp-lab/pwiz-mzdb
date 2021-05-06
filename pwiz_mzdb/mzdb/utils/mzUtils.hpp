@@ -356,6 +356,12 @@ inline static float rtOf(const pwiz::msdata::SpectrumPtr& s) {
 }
 
 inline static int precursorChargeOf(const pwiz::msdata::SpectrumPtr &s) {
+
+	if (s->precursors.empty()) {
+		//JPM : timstof: no precursors
+		return 0;
+	}
+
     const pwiz::msdata::SelectedIon& si = s->precursors.front().selectedIons.front();
     return si.cvParam(pwiz::msdata::MS_charge_state).valueAs<int>();
 }
@@ -366,6 +372,10 @@ inline static int precursorChargeOf(const pwiz::msdata::SpectrumPtr &s) {
  * @return precusor mz as double value
  */
 inline static double precursorMzOf(const pwiz::msdata::SpectrumPtr &s) {
+	if (s->precursors.empty()) {
+		//JPM : timstof: no precursors
+		return 0.0;
+	}
     const pwiz::msdata::SelectedIon& si = s->precursors.front().selectedIons.front();
     return si.cvParam(pwiz::msdata::MS_selected_ion_m_z).valueAs<double>();
 }
@@ -459,16 +469,36 @@ inline vector<double> determineIsolationWindowStarts(pwiz::msdata::SpectrumListP
         } else if(msLevel == 2) {
             // look at all the MS2 spectra for the current MS1 and try to get the target value
             // there may be more than one precursor on multiplexed data (but this algorithm does not seem to work on multiplexed data anyway)
-            pwiz::msdata::Precursor prec = spectrum->precursors[0];
-            if(prec.hasCVParam(pwiz::msdata::MS_isolation_window_target_m_z)) {
-                cndTargets.push_back(stod(prec.cvParam(pwiz::msdata::MS_isolation_window_target_m_z).value));
-            } else {
-                if(prec.isolationWindow.hasCVParam(pwiz::msdata::MS_isolation_window_target_m_z)) {
-                    cndTargets.push_back(stod(prec.isolationWindow.cvParam(pwiz::msdata::MS_isolation_window_target_m_z).value));
-                } else {
-                    nbSpectraWithoutExpectedCvParams++;
-                }
-            }
+			//###VDS TimsTof: Was 
+			/*pwiz::msdata::Precursor prec = spectrum->precursors[0];
+			if (prec.hasCVParam(pwiz::msdata::MS_isolation_window_target_m_z)) {
+				cndTargets.push_back(stod(prec.cvParam(pwiz::msdata::MS_isolation_window_target_m_z).value));
+			}
+			else {
+				if (prec.isolationWindow.hasCVParam(pwiz::msdata::MS_isolation_window_target_m_z)) {
+					cndTargets.push_back(stod(prec.isolationWindow.cvParam(pwiz::msdata::MS_isolation_window_target_m_z).value));
+				}
+				else {
+					nbSpectraWithoutExpectedCvParams++;
+				}
+			}*/
+			//###VDS TimsTof: End Was 
+			//###VDS TimsTof: Add size Verif
+			if (spectrum->precursors.size() == 0) {
+				nbSpectraWithoutExpectedCvParams++;
+			} else {
+				pwiz::msdata::Precursor prec = spectrum->precursors[0];
+				if (prec.hasCVParam(pwiz::msdata::MS_isolation_window_target_m_z)) {
+					cndTargets.push_back(stod(prec.cvParam(pwiz::msdata::MS_isolation_window_target_m_z).value));
+				} else {
+					if (prec.isolationWindow.hasCVParam(pwiz::msdata::MS_isolation_window_target_m_z)) {
+						cndTargets.push_back(stod(prec.isolationWindow.cvParam(pwiz::msdata::MS_isolation_window_target_m_z).value));
+					} else {
+						nbSpectraWithoutExpectedCvParams++;
+					}
+				}
+			}
+			//###VDS TimsTof: END
         }
         if(nbMS1SpectraChecked >= nbMS1SpectraToCheck)
             break;

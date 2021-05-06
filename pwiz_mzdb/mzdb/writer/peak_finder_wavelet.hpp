@@ -86,7 +86,7 @@ static void findPeaks(const pwiz::msdata::SpectrumPtr& spectrum,
     
     // optimize the new centroids and if requested calculate the FWHM values
     vector<std::shared_ptr<Centroid<mz_t, int_t> > > optimizedCentroids;
-    spectrumData.optimize(optimizedCentroids, mzPeakFinderUtils::GAUSS_OPTIMIZATION, computeFWHM);
+    spectrumData.optimize(optimizedCentroids, params.optimizationOpt /*mzPeakFinderUtils::GAUSS_OPTIMIZATION*/, computeFWHM);
     
     // it may happen when the number of points is too low (ie. one point)
     // in this case, fit the original centroids

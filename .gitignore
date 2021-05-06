@@ -1,3 +1,4 @@
 build-nt-x86
 boost_1_67_0
 target
+/Debug

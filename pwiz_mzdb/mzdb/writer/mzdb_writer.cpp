@@ -94,7 +94,7 @@ void mzDBWriter::createTables() {
 
     // foreign keys are not used because of the use of a temporary table
     // for spectrum.
-	std::cout  << "Settings SQLite pragmas..."; //LOG(INFO)
+	std::cout  << "Settings SQLite pragmas..." << std::endl; //LOG(INFO)
     int r = sqlite3_exec(m_mzdbFile.db,
                          //"PRAGMA mmap_size=268435456;"
                          "PRAGMA encoding = 'UTF-8';"
@@ -118,7 +118,7 @@ void mzDBWriter::createTables() {
     //exists, the page size is fixed and can never change.
 
 
-    std::cout << "Create database tables...";//LOG(INFO)
+    std::cout << "Create database tables..." << std::endl;//LOG(INFO)
 
     r = sqlite3_exec(m_mzdbFile.db,
                      "CREATE TABLE data_processing (\n"
@@ -365,7 +365,7 @@ void mzDBWriter::createTables() {
 ///Create indexes
 /// @brief mzDBWriter::setIndexes
 void mzDBWriter::createIndexes() {
-	std::cout << "Creates indexes...";//LOG(INFO) 
+	std::cout << "Creates indexes..." << std::endl;//LOG(INFO) 
 
     int r = sqlite3_exec(m_mzdbFile.db,
                          "CREATE UNIQUE INDEX spectrum_initial_id_idx ON spectrum (initial_id ASC,run_id ASC);"
@@ -391,7 +391,7 @@ void mzDBWriter::createIndexes() {
     m_mzdbFile.stmt = 0;
     //LOG(INFO) << "sqlite3_exec return code: '" << r << "'";
     if (r != SQLITE_OK) {
-        std::cout << "WARNING: could not set up properly table indexes\nPerformance will strongly affected !"; //LOG(WARNING) 
+        std::cout << "WARNING: could not set up properly table indexes\nPerformance will strongly affected !" << std::endl; //LOG(WARNING) 
     }
 }
 
@@ -403,7 +403,7 @@ void mzDBWriter::checkMetaData() {
     softwares.push_back(mzdbSoftPtr);
 
     if (m_msdata->dataProcessingPtrs.empty() ) {
-		std::cout << "updating dataProcessing...";//LOG(INFO)
+		std::cout << "updating dataProcessing..." << std::endl;//LOG(INFO)
 
         if (!  m_msdata->allDataProcessingPtrs().empty()) {
             DataProcessingPtr dataProc = m_msdata->allDataProcessingPtrs().front();
@@ -427,7 +427,7 @@ void mzDBWriter::checkMetaData() {
             m_msdata->dataProcessingPtrs.push_back(dataProc);
 
         }  else {
-			std::cout << "TODO: rebuild the entire dataProcessing, not done yet";//LOG(WARNING) 
+			std::cout << "TODO: rebuild the entire dataProcessing, not done yet" << std::endl;//LOG(WARNING) 
             /*printf("data processings not found...Creating a default instance.\n");
                 vector<DataProcessingPtr>& dataProcessings = _msdata->dataProcessingPtrs;
 
@@ -511,13 +511,9 @@ PWIZ_API_DECL mzDBWriter::mzDBWriter(mzdb::MzDBFile& f,
 
 
     //implementation goes here
-	std::cout << "STEP 1";//LOG(INFO) 
     m_metadataExtractor = std::move(this->getMetadataExtractor());
-	std::cout << "STEP 2";//LOG(INFO) 
     this->buildDataEncodingRowByID();
-	std::cout << "STEP 3"; //LOG(INFO) 
     this->computeResolutions(optMode);
-	std::cout << "STEP 4"; //LOG(INFO) 
 }
 
 
@@ -710,7 +706,7 @@ void mzDBWriter::insertMetaData() {
     //SAMPLE TODO shared param tree, TODO: fill it cause it is actually empty
 
     if (samples.empty()) {
-		std::cout << "Pwiz Sample was empty. Filling it..."; // LOG(INFO)
+		std::cout << "Pwiz Sample was empty. Filling it..." << std::endl; // LOG(INFO)
         samples.push_back(this->m_metadataExtractor->getSample());
     }
 
@@ -757,7 +753,7 @@ void mzDBWriter::insertMetaData() {
 //            m_mzdbFile.stmt = 0;
 //        }
 //    } else {
-	std::cout << "use default source file";//LOG(INFO)
+	std::cout << "use default source file" << std::endl;//LOG(INFO)
     const auto& sourceFile = m_msdata->run.defaultSourceFilePtr;
     m_paramsCollecter.updateCVMap(*sourceFile);
     m_paramsCollecter.updateUserMap(*sourceFile);
@@ -1027,7 +1023,7 @@ void mzDBWriter::checkAndFixRunSliceNumberAnId() {
     m_mzdbFile.stmt = 0;
     //--- ---
     if ( ! std::is_sorted(runSliceIds.begin(), runSliceIds.end()) ) {
-		std::cout << "Detected problem in run slice number...fixing it"; //LOG(INFO)
+		std::cout << "Detected problem in run slice number...fixing it" << std::endl; //LOG(INFO)
         int runSliceNb = 1;
         sqlite3_prepare_v2(m_mzdbFile.db, "UPDATE run_slice set number=? WHERE id=?", -1, &(this->m_mzdbFile.stmt), 0);
         for (size_t i = 0; i < runSliceIds.size(); ++i) {
@@ -1061,19 +1057,18 @@ int mzDBWriter::getMaxMsLevel() {
 void mzDBWriter::isSwathAcquisition() {
     // do not enter the procedure if the analysis cannot be treated
     if(m_Mode == 4) {
-		std::cout << "DDA/DIA detection is not operational for the current file, fallback to DDA mode";//LOG(INFO)
+		std::cout << "DDA/DIA detection is not operational for the current file, fallback to DDA mode" << std::endl;//LOG(INFO)
         return;
     }
     
-	std::cout << "DDA / DIA test";//LOG(INFO)
     
     vector<double> refTargets = PwizHelper::determineIsolationWindowStarts(m_msdata->run.spectrumListPtr);
     // check what has been seen
     if(refTargets.size() == 0) {
-		std::cout << "DDA Mode detected";//LOG(INFO)
+		std::cout << "DDA Mode detected " << std::endl;//LOG(INFO)
         m_swathMode = false;
     } else {
-		std::cout  << "DIA Mode detected";//LOG(INFO)
+		std::cout  << "DIA Mode detected " << std::endl;//LOG(INFO)
         m_swathMode = true;
         // print the isolation windows
         //for(int i = 0; i < refTargets.size() - 1; i++) {
@@ -1168,31 +1163,26 @@ void mzDBWriter::computeResolutions(int nbSpectraToConsider, double minIntensity
     map<int, bool> profileMsLevels;
     
     //m_resolutions.clear();
-	 std::cout << "  - STEP a";//LOG(INFO)
-    // do nothing if user has provided resolutions using CLI
+
+	// do nothing if user has provided resolutions using CLI
     // it is possible that he gave only MS1 and MS2 values but no MS3 value, in this case the default value will be used
     if(m_resolutions.size() == 0) {
-		std::cout << "  - STEP b";//LOG(INFO)
-		
-		std::cout << "  - STEP c";//LOG(INFO)
+	
         // if raw file is not AB Sciex wiff file, use default values
+		//### VDS TODO: get original code... changes were made with default value ! 
         if(m_originFileFormat != MS_ABI_WIFF_format) { // or use m_Mode != 3 ?
 			int defReso;
 			defReso = 20000;
-			std::cout << "  - STEP d ";//LOG(INFO)
 			string defVersion = "default resol";
-			std::cout << "  - STEP e ";//LOG(INFO)
 			defVersion += " " + defReso;
-			std::cout << "  - STEP f "; // LOG(INFO)
-			std::cout << " == " << defVersion;// LOG(INFO)
-			std::cout << "Using default resolution ("  ")";// LOG(INFO)
+			std::cout << "Using default resolution ("  ")" << std::endl;// LOG(INFO)
             m_storeResolutions = false; // no need to store these values
             // put default resolutions for all ms levels (but they wont be used for these file types)
             for(size_t msLevel = 1; msLevel <= max_ms_level; msLevel++) {
 				m_resolutions[msLevel] = defReso; // DEFAULT_RESOLUTION;
             }
         } else {
-			std::cout << "Computing resolutions...";// LOG(INFO)
+			std::cout << "Computing resolutions..." << std::endl;// LOG(INFO)
             pwiz::util::IntegerSet levelsToCentroid;
             // first loop to get a map containing the number of spectrum per ms level
             map<int, vector<size_t>> spectrumIdsPerMsLevel;
@@ -1251,7 +1241,7 @@ void mzDBWriter::computeResolutions(int nbSpectraToConsider, double minIntensity
                         double resolution = roundResolution(resolutionsPerMsLevel[msLevel][n]);
                         m_resolutions[msLevel] = resolution;
                     } else {
-						std::cout << "MS" << msLevel << " resolution could not be calculated, using default resolution (" << DEFAULT_RESOLUTION << ")"; // LOG(WARNING)
+						std::cout << "MS" << msLevel << " resolution could not be calculated, using default resolution (" << DEFAULT_RESOLUTION << ")" << std::endl; // LOG(WARNING)
                         m_resolutions[msLevel] = DEFAULT_RESOLUTION;
                     }
                 } else {
@@ -1263,7 +1253,7 @@ void mzDBWriter::computeResolutions(int nbSpectraToConsider, double minIntensity
     
     for(int i = 0; i < m_resolutions.size(); i++) {
         int msLevel = i+1;
-		std::cout << "MS" << msLevel << " resolution [" << (profileMsLevels[msLevel] ? "PROFILE" : "CENTROID") << "]: ";// << m_resolutions[msLevel];//LOG(INFO) 
+		std::cout << "MS" << msLevel << " resolution [" << (profileMsLevels[msLevel] ? "PROFILE" : "CENTROID") << "]: " << std::endl;// << m_resolutions[msLevel];//LOG(INFO) 
     }
 }
 

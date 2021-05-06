@@ -153,7 +153,7 @@ static void findPeaks(const pwiz::msdata::SpectrumPtr& spectrum,
                     centroidBuffer.push_back(centroids[cId]);
                     collec.setDetectedPeaks(centroidBuffer, params, mzPeakFinderUtils::CWT_DISABLED);
                     // compute fitted data and optimize it with ceres
-                    collec.optimize(optimizedCentroids, mzPeakFinderUtils::GAUSS_OPTIMIZATION, computeFWHM);
+                    collec.optimize(optimizedCentroids, params.optimizationOpt /*mzPeakFinderUtils::GAUSS_OPTIMIZATION*/, computeFWHM);
                     // prepare for next block of peaks or quit
                     if(cId == centroids.size() - 1) {
                         break; // just exit for loop

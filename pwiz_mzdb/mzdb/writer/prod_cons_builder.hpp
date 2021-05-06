@@ -90,6 +90,11 @@ protected:
 		PeakPicker,
 		SpectrumListThermo> DDAThermoConsumerProducer;
 
+	// bruker DDA producer + consumer
+	typedef  mzConsumerProducer< QueueType,
+		mzEmptyMetadataExtractor,
+		PeakPicker,
+		SpectrumListBruker> DDABrukerConsumerProducer;
 	
 
     ///bruker DIA
@@ -210,6 +215,8 @@ protected:
 	unique_ptr<DIAThermoConsumerProducer> mDiaThermoConsumerProducer;
 	unique_ptr<DDAThermoConsumerProducer> mDdaThermoConsumerProducer;
 
+	unique_ptr<DDABrukerConsumerProducer> mDdaBrukerConsumerProducer;
+
     unique_ptr<DIABrukerProducer> mDiaBrukerProducer;
     unique_ptr<DDABrukerProducer> mDdaBrukerProducer;
 
@@ -278,6 +285,7 @@ public:
 		// producer and consumer
 		mDiaThermoConsumerProducer(nullptr),
 		mDdaThermoConsumerProducer(nullptr),
+		mDdaBrukerConsumerProducer(nullptr),
 
 
         //consumers
@@ -315,7 +323,10 @@ public:
             mDdaBrukerProducer = unique_ptr<DDABrukerProducer>(new DDABrukerProducer(queue, mzdbFile, dataModeByMsLevel, resolutions, safeMode));
             mDiaBrukerConsumer = unique_ptr<DIABrukerConsumer>(new DIABrukerConsumer(queue, mzdbFile, paramsCollecter, rawFileFormat, dataEncodings));
             mDdaBrukerConsumer = unique_ptr<DDABrukerConsumer>(new DDABrukerConsumer(queue, mzdbFile, paramsCollecter, rawFileFormat, dataEncodings));
-        } else if (mode == 3) {
+        
+			mDdaBrukerConsumerProducer = unique_ptr<DDABrukerConsumerProducer>(new DDABrukerConsumerProducer(queue, mzdbFile, paramsCollecter, rawFileFormat, dataEncodings, dataModeByMsLevel, resolutions, safeMode));
+
+		} else if (mode == 3) {
             mSwathABIProducer = unique_ptr<SwathABIProducer>(new SwathABIProducer(queue, mzdbFile, dataModeByMsLevel, resolutions, safeMode));
             mDdaABIProducer = unique_ptr<DDAABIProducer>(new DDAABIProducer(queue, mzdbFile, dataModeByMsLevel, resolutions, safeMode));
             mSwathABIConsumer = unique_ptr<SwathABIConsumer>(new SwathABIConsumer(queue, mzdbFile, paramsCollecter, rawFileFormat, dataEncodings));
@@ -510,7 +521,30 @@ public:
     }
 
 
+	
 
+		inline void calculateDDABruker(
+			pwiz::util::IntegerSet& levelsToCentroid,
+			SpectrumListBruker* spectrumList,
+			pair<int, int>& cycleRange,
+			pair<int, int>& rtRange,
+			map<int, double>& bbWidthManager,
+			pwiz::msdata::CVID filetype,
+			mzPeakFinderUtils::PeakPickerParams& params,
+
+			pwiz::msdata::MSDataPtr msdata,
+			ISerializer::xml_string_writer& serializer,
+			map<int, double>& bbMzWidthByMsLevel,
+			map<int, map<int, int> >& runSlices,
+			int& progressionCount,
+			int spectrumListSize,
+			bool progressInformationEnabled) {
+
+		//JPM
+		this->mDdaBrukerConsumerProducer->_produceDDAMonoThread(levelsToCentroid, spectrumList, cycleRange, rtRange, bbWidthManager, filetype, params,
+			msdata, serializer, bbMzWidthByMsLevel, runSlices, progressionCount, spectrumListSize, progressInformationEnabled);
+
+	}
 
 	 inline void calculateDDAThermo(
 		pwiz::util::IntegerSet& levelsToCentroid,
