@@ -112,6 +112,19 @@ int deleteIfExists(const string &filename) {
     return 0;
 }
 
+bool isDirectory(const string& filename) {
+	fs::path path(filename);	
+	std::error_code ec;
+	if (fs::is_directory(status(path))) {
+		//std::cout << "is Dir " << std::endl; //LOG(INFO)
+		return true;
+	}
+	else {
+		//std::cout << "is not Dir" << std::endl; //LOG(INFO)
+		return false;
+	}
+}
+
 /// windows specific
 #ifdef _WIN32 
 bool alreadyOpened(const string& filename) {
@@ -496,10 +509,10 @@ int main(int argc, char* argv[]) {
 
 #ifdef _WIN32
 	//###VDS TIMSTOF Error ( timstof data is a directory ), should comment next verif in that case TODO
-    /*if (alreadyOpened(filename)) {
+    if (!isDirectory(filename) && alreadyOpened(filename)) {
 		std::cerr << "File already open in another application.\nPlease close it to perform conversion.";// LOG(ERROR)
         exit(EXIT_FAILURE);
-    }*/
+    }
 #endif
 
     // check output file name, use input file name if missing, make sure to have the right extension, delete former file if any
