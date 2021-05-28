@@ -1169,17 +1169,13 @@ void mzDBWriter::computeResolutions(int nbSpectraToConsider, double minIntensity
     if(m_resolutions.size() == 0) {
 	
         // if raw file is not AB Sciex wiff file, use default values
-		//### VDS TODO: get original code... changes were made with default value ! 
+
         if(m_originFileFormat != MS_ABI_WIFF_format) { // or use m_Mode != 3 ?
-			int defReso;
-			defReso = 20000;
-			string defVersion = "default resol";
-			defVersion += " " + defReso;
-			std::cout << "Using default resolution ("  ")" << std::endl;// LOG(INFO)
+			std::cout << "Using default resolution (" << DEFAULT_RESOLUTION << ")" << std::endl;// LOG(INFO)
             m_storeResolutions = false; // no need to store these values
             // put default resolutions for all ms levels (but they wont be used for these file types)
             for(size_t msLevel = 1; msLevel <= max_ms_level; msLevel++) {
-				m_resolutions[msLevel] = defReso; // DEFAULT_RESOLUTION;
+				m_resolutions[msLevel] = DEFAULT_RESOLUTION;
             }
         } else {
 			std::cout << "Computing resolutions..." << std::endl;// LOG(INFO)
@@ -1253,7 +1249,7 @@ void mzDBWriter::computeResolutions(int nbSpectraToConsider, double minIntensity
     
     for(int i = 0; i < m_resolutions.size(); i++) {
         int msLevel = i+1;
-		std::cout << "MS" << msLevel << " resolution [" << (profileMsLevels[msLevel] ? "PROFILE" : "CENTROID") << "]: " << std::endl;// << m_resolutions[msLevel];//LOG(INFO) 
+		std::cout << "MS" << msLevel << " resolution [" << (profileMsLevels[msLevel] ? "PROFILE" : "CENTROID|FITTED") << "]: " << std::endl;// << m_resolutions[msLevel];//LOG(INFO) 
     }
 }
 
